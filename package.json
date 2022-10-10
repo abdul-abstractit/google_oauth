@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/abdul-abstractit/google_oauth/issues"
   },
-  "homepage": "https://github.com/abdul-abstractit/google_oauth#readme"
+  "homepage": "https://github.com/abdul-abstractit/google_oauth#readme",
+  "dependencies": {
+    "axios": "^1.1.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "googleapis": "^108.0.0"
+  }
 }

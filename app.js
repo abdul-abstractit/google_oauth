@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios')
 const { google } = require('googleapis')
 
 const app = express();
@@ -12,7 +13,7 @@ const oauth2Client = new google.auth.OAuth2(
   GOOGLE_CLIENT_SECRET,
   'http://localhost:1234/homepage'
 );
-const getGoogleAuthURL = ()=> {
+const getGoogleAuthURL = (oauth2Client)=> {
   const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email',
@@ -24,18 +25,36 @@ const getGoogleAuthURL = ()=> {
     scope: scopes,
   });
 }
+const getGoogleUser = async ({ code }) => {
+  const { tokens } = await oauth2Client.getToken(code);
+  console.log(tokens)
+  console.log(`Access Token: ${tokens.access_token}`)
+  console.log(`Bearer Token: ${tokens.id_token}`)
+
+  const res = await axios(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
+    {
+      headers: {
+        Authorization: `Bearer ${tokens.id_token}`,
+      },
+    },
+  )
+  
+  const googleUser = res.data
+
+
+  return googleUser;
+}
 
 //  1) Getting login url
 app.get('/login',(req,res)=>{
-  console.log('login page')
-  res.send(getGoogleAuthURL())
+  res.send(getGoogleAuthURL(oauth2Client))
 })
 
 
 //  2) Getting user from google with the code 
-app.get('/homepage',(req,res)=>{
-  console.log('home page')
-  res.send(req.body)
+app.get('/homepage', async (req,res)=>{
+  const user=await getGoogleUser(req.query)
+  res.send(user)
 })
 
 
