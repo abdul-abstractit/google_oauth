@@ -1,16 +1,18 @@
 require('dotenv').config({ path: './config.env' });
 const express = require('express');
-const { getGoogleAuthURL, getGoogleUser } = require('./controller/googleAuth')
+const googleAuth = require('./controller/googleAuth');
 
 const app = express();
+const google = googleAuth();
+
 app.use(express.json());
 
 app.get('/login', (req, res) => {
-  res.send(getGoogleAuthURL());
+  res.send(google.getGoogleAuthURL());
 })
 
 app.get('/homepage', async (req, res) => {
-  const user = await getGoogleUser(req.query);
+  const user = await google.getGoogleUser(req.query);
   res.send(user);
 })
 
