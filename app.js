@@ -8,12 +8,12 @@ const google = googleAuth();
 app.use(express.json());
 
 app.get('/login', (req, res) => {
-  res.send(google.getGoogleAuthURL());
+  res.redirect(google.getGoogleAuthURL());
 })
 
 app.get('/homepage', async (req, res) => {
   const user = await google.getGoogleUser(req.query);
-  res.send(user);
+  res.send(`User Data: ${JSON.stringify(user,null,2)}`);
 })
 
 const port = process.env.PORT;
