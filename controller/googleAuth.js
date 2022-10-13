@@ -7,7 +7,7 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.OAUTH_RETURN_URL
 );
 
-const googleAuth = () => ({
+const googleAuth = {
   getGoogleAuthURL: () => {
     const scopes = [
       'https://www.googleapis.com/auth/userinfo.profile',
@@ -33,7 +33,7 @@ const googleAuth = () => ({
 
     return authUser.data;
   }
-})
+}
 
 
 module.exports = googleAuth
