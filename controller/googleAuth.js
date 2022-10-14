@@ -1,10 +1,11 @@
 const axios = require('axios')
 const { google } = require('googleapis')
 
+const oauthRedirectUri = `${process.env.URL}:${process.env.PORT}${process.env.OAUTH_RETURN_URL}`
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.OAUTH_RETURN_URL
+  oauthRedirectUri
 );
 
 const googleAuth = {
