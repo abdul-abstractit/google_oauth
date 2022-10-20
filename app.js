@@ -9,9 +9,7 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
-app.get('/login', (req, res) => {
-  res.redirect(googleAuth.getGoogleAuthURL());
-})
+app.get('/login', (req, res) => res.redirect(googleAuth.getGoogleAuthURL()));
 
 app.get(`/google-auth`, async (req, res) => {
   const user = await googleAuth.getGoogleUser(req.query);
@@ -25,6 +23,20 @@ app.get(`/google-auth`, async (req, res) => {
   res.cookie('accessToken', accessToken, cookieOptions)
   res.cookie('refreshToken', refreshToken, cookieOptions)
   res.status(200).send({accessToken, refreshToken});
+})
+
+const verifyLogin = (req,res,next) => {
+  const respondTokenExpired = () => res.status(200).send({message: "Token expired"});
+  const respondInvalidToken = () => res.status(400).send({message: "Invalid Token"});
+  const checkForExpiration = (result) => (result.isExpired)?respondTokenExpired():next();
+  
+  const accessToken = req.headers.authorization.split(' ')[1];
+  const result = jwtAuth.verifyAccessToken(accessToken);
+  (result.status)?checkForExpiration(result):respondInvalidToken();
+}
+
+app.get('/protected', verifyLogin, (req,res)=>{
+  res.send("Protected route");
 })
 
 const port = process.env.PORT;
