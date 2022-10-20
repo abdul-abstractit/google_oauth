@@ -3,10 +3,14 @@ const jwt = require('jsonwebtoken');
 const verifyToken = (token, secret) => {
   try {
     const decodedPayload = jwt.verify(token, secret);
-    return { status:true, isExpired:false ,decodedPayload };
+    return { status: true, isExpired: false, payload: decodedPayload };
   } catch (error) {
+    const getExpiredPayload = (token, secret) => {
+      const decodedPayload = jwt.verify(token, secret, { ignoreExpiration: true });
+      return { status: true, isExpired: true, payload: decodedPayload };
+    }
     const isExpired = (error.name === 'TokenExpiredError')
-    return (isExpired)?{ status:true, isExpired }:{status:false};
+    return (isExpired) ? getExpiredPayload(token,secret): { status: false };
   }
 }
 
@@ -22,9 +26,19 @@ const createRefreshToken = (payload) => jwt.sign(
 );
 
 const jwtAuth = {
+  createAccessToken: (payload) => jwt.sign(
+    { ...payload },
+    process.env.JWT_ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRES_IN }
+  ),
+  createRefreshToken: (payload) => jwt.sign(
+    { ...payload },
+    process.env.JWT_REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_TOKEN_EXPIRES_IN }
+  ),
   getLoginTokens: (id) => {
-    const accessToken = createAccessToken({ id });
-    const refreshToken = createRefreshToken({ id });
+    const accessToken = jwtAuth.createAccessToken({ id });
+    const refreshToken = jwtAuth.createRefreshToken({ id });
     return { accessToken, refreshToken }
   },
   verifyAccessToken: (token) => verifyToken(token, process.env.JWT_ACCESS_TOKEN_SECRET),

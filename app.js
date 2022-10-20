@@ -26,9 +26,14 @@ app.get(`/google-auth`, async (req, res) => {
 })
 
 const verifyLogin = (req,res,next) => {
-  const respondTokenExpired = () => res.status(200).send({message: "Token expired"});
+  const respondNewToken = (expiredPayload) => {
+    //TODO:verify refresh token and extract id from refresh token
+    const { id } = expiredPayload;
+    const newAccessToken = jwtAuth.createAccessToken({id})
+    res.status(200).send({message: "Token expired",newAccessToken})
+  };
   const respondInvalidToken = () => res.status(400).send({message: "Invalid Token"});
-  const checkForExpiration = (result) => (result.isExpired)?respondTokenExpired():next();
+  const checkForExpiration = ({isExpired,payload}) =>(isExpired)?respondNewToken(payload):next();
   
   const accessToken = req.headers.authorization.split(' ')[1];
   const result = jwtAuth.verifyAccessToken(accessToken);
